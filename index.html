@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Triage Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+            --light-bg: #f8f9fa;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+        }
+        
+        .nav-link {
+            color: var(--primary-color);
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover {
+            color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .main-container {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .assessment-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .symptom-input {
+            background: var(--light-bg);
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+        
+        .symptom-input:focus-within {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 20px rgba(52, 152, 219, 0.2);
+        }
+        
+        .vital-signs {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .vital-input {
+            margin-bottom: 1rem;
+        }
+        
+        .vital-input label {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.3rem;
+        }
+        
+        .vital-input input {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 0.5rem;
+            width: 100%;
+            transition: all 0.3s;
+        }
+        
+        .vital-input input:focus {
+            border-color: var(--secondary-color);
+            outline: none;
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.2);
+        }
+        
+        .assess-btn {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 1rem 2.5rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 1.5rem;
+        }
+        
+        .assess-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(52, 152, 219, 0.4);
+        }
+        
+        .assess-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-top: 2rem;
+            border-left: 5px solid var(--secondary-color);
+            animation: slideIn 0.5s ease;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .triage-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .triage-0 { background: #27ae60; color: white; }
+        .triage-1 { background: #f39c12; color: white; }
+        .triage-2 { background: #e67e22; color: white; }
+        .triage-3 { background: #e74c3c; color: white; }
+        
+        .action-item {
+            background: var(--light-bg);
+            padding: 0.8rem;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+            border-left: 3px solid var(--secondary-color);
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .info-item {
+            background: var(--light-bg);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .info-item i {
+            font-size: 2rem;
+            color: var(--secondary-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .quick-samples {
+            margin-top: 2rem;
+        }
+        
+        .sample-btn {
+            background: white;
+            border: 2px solid var(--secondary-color);
+            color: var(--secondary-color);
+            border-radius: 50px;
+            padding: 0.5rem 1rem;
+            margin: 0.3rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+        
+        .sample-btn:hover {
+            background: var(--secondary-color);
+            color: white;
+        }
+        
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .toast {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            animation: slideInRight 0.3s ease;
+        }
+        
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-hospital-user me-2"></i>
+                MediTriage AI
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="fas fa-home me-1"></i>Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard"><i class="fas fa-chart-bar me-1"></i>Dashboard</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <div class="main-container">
+        <div class="assessment-card">
+            <h2 class="text-center mb-4">
+                <i class="fas fa-notes-medical me-2" style="color: var(--secondary-color);"></i>
+                Emergency Triage Assessment
+            </h2>
+            
+            <div class="symptom-input">
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-bold">Patient Symptoms / Chief Complaint</label>
+                        <textarea class="form-control" id="symptoms" rows="3" 
+                                  placeholder="Describe the patient's symptoms, e.g., 'Severe chest pain with difficulty breathing, patient is conscious but anxious'"></textarea>
+                    </div>
+                </div>
+
+                <div class="vital-signs">
+                    <h5 class="mb-3"><i class="fas fa-heartbeat me-2" style="color: var(--secondary-color);"></i>Vital Signs (Optional)</h5>
+                    <div class="row">
+                        <div class="col-md-3 vital-input">
+                            <label>Age (years)</label>
+                            <input type="number" id="age" class="form-control" placeholder="e.g., 45">
+                        </div>
+                        <div class="col-md-3 vital-input">
+                            <label>Heart Rate (bpm)</label>
+                            <input type="number" id="heartRate" class="form-control" placeholder="e.g., 88">
+                        </div>
+                        <div class="col-md-3 vital-input">
+                            <label>Blood Pressure (systolic)</label>
+                            <input type="number" id="bpSystolic" class="form-control" placeholder="e.g., 120">
+                        </div>
+                        <div class="col-md-3 vital-input">
+                            <label>Oxygen Saturation (%)</label>
+                            <input type="number" id="oxygen" class="form-control" placeholder="e.g., 97">
+                        </div>
+                        <div class="col-md-3 vital-input">
+                            <label>Temperature (°C)</label>
+                            <input type="number" id="temperature" class="form-control" placeholder="e.g., 37.5" step="0.1">
+                        </div>
+                        <div class="col-md-3 vital-input">
+                            <label>Pain Level (1-10)</label>
+                            <input type="number" id="painLevel" class="form-control" placeholder="e.g., 7" min="1" max="10">
+                        </div>
+                    </div>
+                </div>
+
+                <button class="assess-btn" id="assessBtn" onclick="performAssessment()">
+                    <i class="fas fa-stethoscope me-2"></i>
+                    Perform Triage Assessment
+                </button>
+            </div>
+
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Analyzing patient data...</p>
+            </div>
+
+            <div id="resultContainer"></div>
+
+            <div class="quick-samples">
+                <h5 class="mb-3">Quick Test Samples:</h5>
+                <button class="sample-btn" onclick="fillSample('chest')">
+                    <i class="fas fa-heart me-1"></i> Chest Pain
+                </button>
+                <button class="sample-btn" onclick="fillSample('trauma')">
+                    <i class="fas fa-car-crash me-1"></i> Trauma
+                </button>
+                <button class="sample-btn" onclick="fillSample('respiratory')">
+                    <i class="fas fa-lungs me-1"></i> Respiratory Distress
+                </button>
+                <button class="sample-btn" onclick="fillSample('neuro')">
+                    <i class="fas fa-brain me-1"></i> Neurological
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+                ${message}
+            `;
+            document.getElementById('toastContainer').appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        function fillSample(type) {
+            const samples = {
+                chest: {
+                    symptoms: "55-year-old male with crushing chest pain radiating to left arm, shortness of breath, sweating profusely",
+                    age: 55,
+                    heartRate: 110,
+                    bpSystolic: 160,
+                    oxygen: 92,
+                    temperature: 37.2,
+                    painLevel: 8
+                },
+                trauma: {
+                    symptoms: "30-year-old involved in car accident, conscious but confused, visible bleeding from head wound, complains of neck pain",
+                    age: 30,
+                    heartRate: 120,
+                    bpSystolic: 90,
+                    oxygen: 95,
+                    temperature: 36.8,
+                    painLevel: 9
+                },
+                respiratory: {
+                    symptoms: "45-year-old with sudden difficulty breathing, wheezing, can't speak full sentences, history of asthma",
+                    age: 45,
+                    heartRate: 115,
+                    bpSystolic: 140,
+                    oxygen: 88,
+                    temperature: 37.5,
+                    painLevel: 6
+                },
+                neuro: {
+                    symptoms: "70-year-old with sudden onset of left-sided weakness, facial drooping, slurred speech",
+                    age: 70,
+                    heartRate: 95,
+                    bpSystolic: 180,
+                    oxygen: 96,
+                    temperature: 36.9,
+                    painLevel: 2
+                }
+            };
+            
+            const sample = samples[type];
+            document.getElementById('symptoms').value = sample.symptoms;
+            document.getElementById('age').value = sample.age;
+            document.getElementById('heartRate').value = sample.heartRate;
+            document.getElementById('bpSystolic').value = sample.bpSystolic;
+            document.getElementById('oxygen').value = sample.oxygen;
+            document.getElementById('temperature').value = sample.temperature;
+            document.getElementById('painLevel').value = sample.painLevel;
+            
+            showToast(`Sample "${type}" loaded`, 'success');
+        }
+
+        async function performAssessment() {
+            const symptoms = document.getElementById('symptoms').value.trim();
+            
+            if (!symptoms) {
+                showToast('Please enter patient symptoms', 'error');
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loadingSpinner').style.display = 'block';
+            document.getElementById('assessBtn').disabled = true;
+            document.getElementById('resultContainer').innerHTML = '';
+
+            // Collect vitals
+            const vitals = {
+                age: document.getElementById('age').value,
+                heart_rate: document.getElementById('heartRate').value,
+                bp_systolic: document.getElementById('bpSystolic').value,
+                oxygen: document.getElementById('oxygen').value,
+                temperature: document.getElementById('temperature').value,
+                pain_level: document.getElementById('painLevel').value
+            };
+
+            try {
+                const response = await fetch('/assess', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        symptoms: symptoms,
+                        ...vitals
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayResults(data.assessment, data.assessment_id);
+                    showToast('Assessment complete!', 'success');
+                } else {
+                    showToast(data.error || 'Assessment failed', 'error');
+                }
+            } catch (error) {
+                showToast('Network error: ' + error.message, 'error');
+            } finally {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                document.getElementById('assessBtn').disabled = false;
+            }
+        }
+
+        function displayResults(assessment, assessmentId) {
+            const triageLevel = assessment.triage_level;
+            const triageColors = ['success', 'warning', 'warning', 'danger'];
+            const triageLabels = ['Non-urgent', 'Less Urgent', 'Urgent', 'Emergency'];
+            
+            const resultHtml = `
+                <div class="result-card">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="triage-badge triage-${triageLevel}">
+                            Level ${triageLevel}: ${triageLabels[triageLevel]}
+                        </span>
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>
+                            Confidence: ${assessment.confidence || 75}%
+                        </small>
+                    </div>
+                    
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <i class="fas fa-flag"></i>
+                            <h6>Priority</h6>
+                            <p class="fw-bold">${assessment.priority || 'Medium'}</p>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-building"></i>
+                            <h6>Department</h6>
+                            <p class="fw-bold">${assessment.department || 'General Ward'}</p>
+                        </div>
+                        <div class="info-item">
+                            <i class="fas fa-hourglass-half"></i>
+                            <h6>Urgency</h6>
+                            <p class="fw-bold">${assessment.urgency || 'Routine'}</p>
+                        </div>
+                    </div>
+                    
+                    <h5 class="mt-4"><i class="fas fa-actions me-2" style="color: var(--secondary-color);"></i>Immediate Actions</h5>
+                    <div class="actions-list">
+                        ${assessment.immediate_actions && assessment.immediate_actions.length > 0 ? 
+                            assessment.immediate_actions.map(action => 
+                                `<div class="action-item"><i class="fas fa-check-circle me-2" style="color: var(--success-color);"></i>${action}</div>`
+                            ).join('') : 
+                            '<p>No specific actions provided</p>'
+                        }
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-stethoscope me-2"></i>Reasoning</h6>
+                            <p class="text-muted">${assessment.reasoning || 'Based on standard triage protocols'}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-exclamation-triangle me-2"></i>Risk Factors</h6>
+                            <p class="text-muted">${assessment.risk_factors || 'None identified'}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <h6><i class="fas fa-clock me-2"></i>Follow-up</h6>
+                        <p class="text-muted">${assessment.follow_up || 'As per standard protocol'}</p>
+                    </div>
+                    
+                    <div class="mt-4 text-end">
+                        <a href="/assessment/${assessmentId}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-external-link-alt me-1"></i>View Full Assessment
+                        </a>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('resultContainer').innerHTML = resultHtml;
+            
+            // Scroll to results
+            document.getElementById('resultContainer').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'nearest' 
+            });
+        }
+
+        // Enable Enter key to submit
+        document.getElementById('symptoms').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                performAssessment();
+            }
+        });
+    </script>
+</body>
+</html>
