@@ -52,28 +52,12 @@ This system helps healthcare professionals and first responders make rapid, info
 | **Serialization** | Pickle |
 
 ## 🏗️ Architecture
-┌─────────────────────────────────────────────────────────────┐
+
 │ User Interface (Flask) │
-├─────────────────────────────────────────────────────────────┤
 │ Triage Assessment Engine │
-├───────────────┬─────────────────────────────┬───────────────┤
 │ Retrieval │ Augmentation │ Generation │
 │ (FAISS) │ (NDMA PDF Context) │ (DialoGPT) │
-├───────────────┴─────────────────────────────┴───────────────┤
 │ Knowledge Base (NDMA.pdf) │
 
-## 📁 Project Structure
-intelligent-context-pruning/
-├── model/
-│ ├── triage_model.py # RAG implementation
-│ ├── data_processor.py # Data handling & statistics
-│ └── test_models.py # Unit tests
-├── templates/
-│ ├── index.html # Assessment interface
-│ ├── dashboard.html # Analytics dashboard
-│ └── assessment.html # Individual assessment view
-├── app.py # Flask application
-├── NDMA.pdf # Knowledge base (your file)
-├── requirements.txt # Dependencies
-├── README.md # This file
+
 
